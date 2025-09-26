@@ -1,0 +1,225 @@
+# MVP Product Description — **HyperLocal Forecast (per-SKU, per-hour)**
+
+**One-liner:**
+A lightweight, developer-friendly SaaS that ingests store POS/ERP data and gives **7-day, per-SKU probabilistic forecasts**, lead-time aware reorder suggestions, and a simple dashboard so dark-stores / micro-fulfillment teams stop stockouts and overstock.
+
+---
+
+## Target users
+
+* Dark-store / quick-commerce ops managers
+* Grocery / convenience chain inventory planners
+* 3PLs running micro-fulfillment hubs
+
+---
+
+## Problem (short)
+
+Stores miss demand micro-windows (hour/day) for specific SKUs → lost orders, wasted stock, missed SLA.
+
+---
+
+## Core value proposition
+
+Deliver accurate, actionable forecasts with uncertainty and a one-click reorder suggestion that respects supplier lead time and local events — so stores order the *right amount, at the right time*.
+
+---
+
+## MVP scope (must-have features)
+
+1. **Data ingest**
+
+   * CSV upload + scheduled CSV sync (SFTP/FTP) + simple ERP connector (quickstart).
+   * Sample CSV format below.
+
+2. **7-day per-SKU forecast**
+
+   * Hourly or daily aggregation (configurable), returns expected demand + 50%/95% prediction intervals.
+
+3. **Reorder / replenish suggestion**
+
+   * Lead-time aware reorder quantity = expected demand during lead time + safety stock − on-hand.
+   * Provide both conservative and aggressive suggestions and explain the math.
+
+4. **Anomaly detection & alerts**
+
+   * Flag sudden spikes/drops (promotions, data issues) and let ops accept/ignore.
+
+5. **Interactive dashboard**
+
+   * Top-at-risk SKUs per store, forecast plots (mean + PI), suggested PO list, exportable CSV/PDF.
+
+6. **API & Webhooks**
+
+   * REST endpoint to request forecasts per store+SKU and webhook to push reorder suggestions to ERP/PO system.
+
+7. **Ops workflow**
+
+   * Approve/adjust suggested POs and push to ERP (manual accept in MVP).
+
+---
+
+## Example user flows
+
+1. **Onboard**
+
+   * Create account → add store(s) → upload SKU master and POS sample CSV → configure supplier lead times.
+
+2. **Nightly Forecast**
+
+   * System ingests latest POS, runs forecasts, produces a “Top 20 SKUs at risk” list and suggested POs for next supplier window. Ops reviews, adjusts, exports.
+
+3. **Realtime Check**
+
+   * Via API: Checkout widget or merchant portal calls `GET /v1/forecast?store=XX&sku=YYY&horizon=168` to get forecast and PI.
+
+---
+
+## Data model (core tables / JSON shapes)
+
+**SKU master**
+
+```sql
+sku_master(sku_id PK, sku_code, name, category, weight, shelf_life_days, lead_time_days, supplier_id, price)
+```
+
+**Sales events / POS**
+
+```sql
+sales(store_id, sku_id, timestamp, qty, order_id, price, promo_flag)
+```
+
+**Inventory**
+
+```sql
+inventory(store_id, sku_id, on_hand, reserved, last_counted_at)
+```
+
+**Forecasts**
+
+```sql
+forecasts(id, store_id, sku_id, horizon_hours, generated_at,
+          median_forecast JSON, p10 JSON, p90 JSON, metadata JSON)
+```
+
+**Reorder suggestions**
+
+```sql
+reorders(id, store_id, sku_id, suggested_qty, safety_stock, lead_time_days, rationale_json, status)
+```
+
+---
+
+## Minimal API (MVP)
+
+* `POST /v1/ingest/sales` — upload CSV or link (returns job id)
+* `POST /v1/forecast/run` — trigger forecast job (store or batch)
+* `GET  /v1/forecast/{store_id}/{sku_id}?horizon=168` — returns median + PIs + metadata
+* `GET  /v1/reorders/{store_id}` — list suggested POs
+* Webhook subscription: `POST /v1/webhook` for reorder-ready notifications
+
+Response sample (GET forecast):
+
+```json
+{
+  "store_id":"S123",
+  "sku_id":"MN-70-S",
+  "generated_at":"2025-09-26T00:00:00Z",
+  "horizon_hours":168,
+  "median":[25,30,22,...],
+  "p05":[18,22,15,...],
+  "p95":[33,40,29,...],
+  "metadata":{"model":"ensemble-nbeats-lgbm-v1","notes":"promo flagged on day2"}
+}
+```
+
+---
+
+## Suggested tech stack (MVP)
+
+* Backend API: **FastAPI (Python)**
+* Orchestration: **Redis + Celery** (jobs)
+* DB: **Postgres** (metadata), S3 for artifacts (CSV, charts)
+* Forecasting models: **Ensemble** — N-BEATS or DeepAR (for time series) + LightGBM for feature model; or Prophet as a simple baseline
+* Uncertainty: quantile regression / probabilistic forecasts (quantiles from models)
+* Dashboard: **React + Tailwind**
+* Containerization: Docker, deploy on AWS/GCP (ECS / small k8s cluster)
+* Optional: **Pinecone/Milvus** for similarity/transfer clusters if scaling quickly
+
+---
+
+## Modeling approach (practical & trustable)
+
+* **Baseline models:** Prophet / LightGBM per SKU-group.
+* **Production model:** hierarchical time-series + transfer learning (store clusters) using N-BEATS or DeepAR for probabilistic output.
+* **Features:** store-level recent sales, day-of-week, hour-of-day, price, promo flag, holiday/event flag, weather features (temp, rain), moving averages.
+* **Cold start:** initialize new store using cluster medians + category-level forecasts; gradually personalize with store data.
+
+---
+
+## Evaluation & success metrics
+
+* **Primary:** MAPE (per SKU×store), target: <20% at SKU×store level (depends on SKU volume).
+* **Business KPIs:** stockout rate ↓, fill-rate ↑, inventory days ↓.
+* **Forecast quality:** Prediction interval coverage (e.g., 95% PI contains truth ~95% of time).
+* **Operational:** % of suggested POs accepted by ops; time saved per replenishment cycle.
+
+---
+
+## Sample CSV columns (POS upload)
+
+```
+store_id,order_id,timestamp,sku_code,qty,price,promo_flag
+S123,ORD0001,2025-09-25T10:03:00Z,MN-70-S,2,25.0,0
+...
+```
+
+---
+
+## Pricing model (MVP-friendly)
+
+* **Free tier:** up to 2 stores, 1,000 SKU-days / month, basic dashboard
+* **Starter ($99/mo):** up to 10 stores, 10k SKU-days, API access
+* **Pro ($499/mo):** up to 50 stores, priority support, custom connectors
+* **Enterprise:** custom pricing, SLA, data integrations, on-prem option
+
+(Alternate: per-SKU/month pricing for high-volume customers.)
+
+---
+
+## Pilot plan (30–60 days)
+
+1. **Week 0–1:** Kickoff with 1–2 partner stores; collect historical POS (≥3 months ideally) + SKU master + lead times.
+2. **Week 2:** Data ingestion pipeline + cleaning + baseline model (Prophet/LightGBM) → show first 7-day forecasts.
+3. **Week 3–4:** Reorder suggestion logic + dashboard; ops starts review cycle.
+4. **Week 5–6:** Refine models with feedback, introduce uncertainty bands, measure acceptance rate and initial KPI lift.
+   **Pilot success criteria:** >30% reduction in stockouts for pilot SKUs OR >50% of auto-suggested POs accepted.
+
+---
+
+## Risks & mitigations
+
+* **Noisy / missing POS:** add robust data cleaning and require minimal daily sales data; fill missing with category medians.
+* **Cold start stores:** use cluster transfer learning and conservative safety stock.
+* **Supplier lead-time variability:** allow ops to set lead-time distributions and use conservative estimates initially.
+* **Over-automation risk:** always require human approval for POs in MVP.
+
+---
+
+## 8-week MVP roadmap (high level)
+
+* **Week 1–2:** Data connectors + schema + dashboard skeleton
+* **Week 3–4:** Baseline forecasting + API endpoints + UI plots
+* **Week 5–6:** Reorder engine + PI / uncertainty + alerts
+* **Week 7:** Pilot onboarding + docs + training
+* **Week 8:** Measure pilot metrics, iterate, prepare pricing + go-to-market
+
+---
+
+If you want, I’ll now **generate** one of these instantly:
+
+* **A.** Ready-to-run sample pipeline code (ingest CSV → clean → Prophet baseline → output JSON).
+* **B.** Dashboard wireframe + mock data image.
+* **C.** Full OpenAPI spec for the endpoints above.
+
+Tell me **A**, **B**, or **C** and I’ll deliver it immediately.
