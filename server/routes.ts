@@ -6,6 +6,7 @@ import { forecastService } from "./services/forecastService";
 import { csvProcessor } from "./services/csvProcessor";
 import { anomalyDetectionService } from "./services/anomalyDetection";
 import { exportService } from "./services/exportService";
+import { notificationService } from "./services/notificationService";
 import { withAuth, withResourceAuth, type AuthenticatedRequest } from "./middleware/rbac";
 import { 
   insertSkuSchema, 
@@ -525,6 +526,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send(csvData);
     } catch (error) {
       res.status(500).json({ message: 'Failed to export organization reorders' });
+    }
+  });
+
+  // Notification routes
+  app.post('/api/notifications/test', isAuthenticated, ...withAuth('admin'), async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user.organizationId) {
+        return res.status(400).json({ message: 'User not associated with organization' });
+      }
+      await notificationService.runDailyChecks(req.user.organizationId);
+      res.json({ message: 'Daily notification check completed' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to run notification checks' });
+    }
+  });
+
+  app.post('/api/notifications/weekly-summary', isAuthenticated, ...withAuth('admin'), async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user.organizationId) {
+        return res.status(400).json({ message: 'User not associated with organization' });
+      }
+      await notificationService.sendWeeklySummary(req.user.organizationId);
+      res.json({ message: 'Weekly summary sent' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to send weekly summary' });
     }
   });
 
