@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
 import { TrendingUp } from "lucide-react";
+import type { Sku, Forecast } from "@/types";
 
 interface ForecastChartProps {
   storeId: string;
@@ -12,30 +13,31 @@ interface ForecastChartProps {
 export default function ForecastChart({ storeId }: ForecastChartProps) {
   const [selectedSkuId, setSelectedSkuId] = useState<string>("");
 
-  const { data: skus } = useQuery({
+  const { data: skus = [] } = useQuery<Sku[]>({
     queryKey: ["/api/skus"],
     enabled: !!storeId,
   });
 
-  const { data: forecast, isLoading } = useQuery({
+  const { data: forecast, isLoading } = useQuery<Forecast>({
     queryKey: ["/api/forecasts", storeId, selectedSkuId],
     enabled: !!storeId && !!selectedSkuId,
   });
 
   // Set default SKU
-  useState(() => {
-    if (skus && skus.length > 0 && !selectedSkuId) {
+  useEffect(() => {
+    if (!selectedSkuId && skus.length > 0) {
       setSelectedSkuId(skus[0].id);
     }
-  });
+  }, [skus, selectedSkuId]);
 
   // Prepare chart data
-  const chartData = forecast ? (forecast.medianForecast as number[]).map((median, index) => ({
-    day: `Day ${index + 1}`,
-    median,
-    p10: (forecast.p10Forecast as number[])[index] || median * 0.7,
-    p90: (forecast.p90Forecast as number[])[index] || median * 1.3,
-  })) : [];
+  const chartData = forecast && forecast.medianForecast ? 
+    (forecast.medianForecast as number[]).map((median, index) => ({
+      day: `Day ${index + 1}`,
+      median,
+      p10: (forecast.p10Forecast as number[])?.[index] || median * 0.7,
+      p90: (forecast.p90Forecast as number[])?.[index] || median * 1.3,
+    })) : [];
 
   return (
     <Card className="mb-6">
@@ -43,13 +45,13 @@ export default function ForecastChart({ storeId }: ForecastChartProps) {
         <div className="flex items-center justify-between">
           <CardTitle>7-Day Demand Forecast</CardTitle>
           <div className="flex items-center space-x-4">
-            {skus && skus.length > 0 && (
+            {skus.length > 0 && (
               <Select value={selectedSkuId} onValueChange={setSelectedSkuId}>
                 <SelectTrigger className="w-64">
                   <SelectValue placeholder="Select SKU" />
                 </SelectTrigger>
                 <SelectContent>
-                  {skus.map((sku: any) => (
+                  {skus.map((sku) => (
                     <SelectItem key={sku.id} value={sku.id}>
                       {sku.name}
                     </SelectItem>

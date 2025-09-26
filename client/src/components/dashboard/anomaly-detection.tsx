@@ -14,7 +14,7 @@ export default function AnomalyDetection({ storeId }: AnomalyDetectionProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: anomalies, isLoading } = useQuery({
+  const { data: anomalies = [], isLoading } = useQuery<Anomaly[]>({
     queryKey: ["/api/anomalies", storeId],
     enabled: !!storeId,
   });
@@ -97,7 +97,7 @@ export default function AnomalyDetection({ storeId }: AnomalyDetectionProps) {
     );
   }
 
-  const pendingAnomalies = anomalies?.filter((a: Anomaly) => a.status === 'pending') || [];
+  const pendingAnomalies = anomalies.filter((a: Anomaly) => a.status === 'pending');
 
   return (
     <Card>
@@ -115,7 +115,8 @@ export default function AnomalyDetection({ storeId }: AnomalyDetectionProps) {
           ) : (
             pendingAnomalies.map((anomaly: Anomaly) => {
               const Icon = getAnomalyIcon(anomaly.type);
-              const colors = getAnomalyColor(anomaly.severity);
+              const displaySeverity = anomaly.severity || 'low';
+              const colors = getAnomalyColor(displaySeverity);
               
               return (
                 <div
@@ -126,15 +127,15 @@ export default function AnomalyDetection({ storeId }: AnomalyDetectionProps) {
                     <div className={`font-medium ${colors.text} flex items-center space-x-2`}>
                       <Icon className="h-4 w-4" />
                       <span className="capitalize">
-                        {anomaly.type.replace('_', ' ')} - {anomaly.severity} severity
+                        {anomaly.type.replace('_', ' ')} - {displaySeverity} severity
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {new Date(anomaly.detectedAt).toLocaleTimeString()}
+                      {anomaly.detectedAt ? new Date(anomaly.detectedAt).toLocaleTimeString() : 'Unknown time'}
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground mb-2">
-                    {anomaly.description}
+                    {anomaly.description || 'No description available'}
                   </div>
                   <div className="flex space-x-2">
                     <Button
