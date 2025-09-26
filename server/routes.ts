@@ -183,7 +183,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verify the store belongs to the user's organization
       const store = await storage.getStore(validatedData.storeId);
       if (!store || store.organizationId !== req.user.organizationId) {
-        return res.status(403).json({ message: "Access denied to store" });
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      // Verify the SKU belongs to the user's organization
+      const sku = await storage.getSku(validatedData.skuId);
+      if (!sku || sku.organizationId !== req.user.organizationId) {
+        return res.status(404).json({ message: "SKU not found" });
       }
 
       const inventory = await storage.upsertInventory(validatedData);
@@ -378,6 +384,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       res.status(500).json({ message: "Failed to import CSV data" });
+    }
+  });
+
+  // Data job status tracking
+  app.get('/api/data/jobs/:id', isAuthenticated, ...withAuth(), async (req: AuthenticatedRequest, res) => {
+    try {
+      const job = await storage.getDataJob(req.params.id);
+      if (!job) {
+        return res.status(404).json({ message: "Data job not found" });
+      }
+
+      // Verify job belongs to user's organization
+      if (job.organizationId !== req.user.organizationId) {
+        return res.status(404).json({ message: "Data job not found" });
+      }
+
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch data job" });
     }
   });
 
