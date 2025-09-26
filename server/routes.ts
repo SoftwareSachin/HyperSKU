@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { forecastService } from "./services/forecastService";
 import { csvProcessor } from "./services/csvProcessor";
 import { anomalyDetectionService } from "./services/anomalyDetection";
+import { exportService } from "./services/exportService";
 import { withAuth, withResourceAuth, type AuthenticatedRequest } from "./middleware/rbac";
 import { 
   insertSkuSchema, 
@@ -423,6 +424,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(topRiskSkus);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch top risk SKUs" });
+    }
+  });
+
+  // Export routes
+  app.get('/api/export/forecasts/:storeId', isAuthenticated, ...withResourceAuth('store'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const { format = 'csv' } = req.query;
+      
+      if (format === 'csv') {
+        const csvData = await exportService.exportForecastsCSV({
+          format: 'csv',
+          organizationId: req.user.organizationId!,
+          storeId: req.params.storeId,
+        });
+        
+        const store = await storage.getStore(req.params.storeId);
+        const filename = `forecasts_${store?.code}_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(csvData);
+      } else {
+        res.status(400).json({ message: 'Unsupported format' });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to export forecasts' });
+    }
+  });
+
+  app.get('/api/export/reorders/:storeId', isAuthenticated, ...withResourceAuth('store'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const { format = 'csv' } = req.query;
+      
+      if (format === 'csv') {
+        const csvData = await exportService.exportReordersCSV({
+          format: 'csv',
+          organizationId: req.user.organizationId!,
+          storeId: req.params.storeId,
+        });
+        
+        const store = await storage.getStore(req.params.storeId);
+        const filename = `reorders_${store?.code}_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(csvData);
+      } else {
+        res.status(400).json({ message: 'Unsupported format' });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to export reorders' });
+    }
+  });
+
+  app.get('/api/export/inventory/:storeId', isAuthenticated, ...withResourceAuth('store'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const csvData = await exportService.exportInventoryCSV(req.params.storeId, req.user.organizationId!);
+      
+      const store = await storage.getStore(req.params.storeId);
+      const filename = `inventory_${store?.code}_${new Date().toISOString().split('T')[0]}.csv`;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(csvData);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to export inventory' });
+    }
+  });
+
+  // Organization-wide exports (for admins)
+  app.get('/api/export/org/forecasts', isAuthenticated, ...withAuth('admin', 'manager'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const csvData = await exportService.exportForecastsCSV({
+        format: 'csv',
+        organizationId: req.user.organizationId!,
+      });
+      
+      const filename = `org_forecasts_${new Date().toISOString().split('T')[0]}.csv`;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(csvData);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to export organization forecasts' });
+    }
+  });
+
+  app.get('/api/export/org/reorders', isAuthenticated, ...withAuth('admin', 'manager'), async (req: AuthenticatedRequest, res) => {
+    try {
+      const csvData = await exportService.exportReordersCSV({
+        format: 'csv',
+        organizationId: req.user.organizationId!,
+      });
+      
+      const filename = `org_reorders_${new Date().toISOString().split('T')[0]}.csv`;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(csvData);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to export organization reorders' });
     }
   });
 
