@@ -1,6 +1,8 @@
 import { parse } from 'csv-parse/sync';
 import { storage } from '../storage';
+import { insertSalesSchema, insertInventorySchema, insertSkuSchema } from '@shared/schema';
 import type { InsertSales, InsertInventory, InsertSku } from '@shared/schema';
+import { z } from 'zod';
 
 interface CSVProcessorOptions {
   organizationId: string;
@@ -104,7 +106,8 @@ class CSVProcessor {
           }
         }
 
-        validSales.push({
+        // Validate with Zod schema
+        const salesData = {
           storeId,
           skuId,
           orderId: record.order_id || null,
@@ -112,7 +115,15 @@ class CSVProcessor {
           quantity,
           price,
           promoFlag: record.promo_flag === '1' || record.promo_flag?.toLowerCase() === 'true',
-        });
+        };
+
+        const validationResult = insertSalesSchema.safeParse(salesData);
+        if (!validationResult.success) {
+          errors.push(`Row ${rowNum}: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
+          continue;
+        }
+
+        validSales.push(validationResult.data);
 
       } catch (error) {
         errors.push(`Row ${rowNum}: ${error instanceof Error ? error.message : 'Processing error'}`);
@@ -193,13 +204,22 @@ class CSVProcessor {
           }
         }
 
-        await storage.upsertInventory({
+        // Validate with Zod schema
+        const inventoryData = {
           storeId,
           skuId,
           onHand,
           reserved,
           lastCountedAt,
-        });
+        };
+
+        const validationResult = insertInventorySchema.safeParse(inventoryData);
+        if (!validationResult.success) {
+          errors.push(`Row ${rowNum}: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
+          continue;
+        }
+
+        await storage.upsertInventory(validationResult.data);
 
         processedCount++;
 
@@ -277,7 +297,8 @@ class CSVProcessor {
           supplierId = supplierMap.get(record.supplier_name) || null;
         }
 
-        await storage.createSku({
+        // Validate with Zod schema
+        const skuData = {
           organizationId,
           code: record.sku_code,
           name: record.name,
@@ -288,7 +309,15 @@ class CSVProcessor {
           supplierId,
           price,
           isActive: true,
-        });
+        };
+
+        const validationResult = insertSkuSchema.safeParse(skuData);
+        if (!validationResult.success) {
+          errors.push(`Row ${rowNum}: ${validationResult.error.errors.map(e => e.message).join(', ')}`);
+          continue;
+        }
+
+        await storage.createSku(validationResult.data);
 
         processedCount++;
 
@@ -333,7 +362,7 @@ class CSVProcessor {
       }
 
       // Check if required columns exist
-      const firstRecord = records[0];
+      const firstRecord = records[0] as Record<string, any>;
       const missingFields = requiredFields[type].filter(field => !(field in firstRecord));
       
       if (missingFields.length > 0) {
