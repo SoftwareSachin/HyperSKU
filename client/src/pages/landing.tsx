@@ -18,17 +18,17 @@ import {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-                <BarChart3 className="h-5 w-5 text-primary-foreground" />
+              <div className="h-9 w-9 rounded-xl bg-foreground flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-background" />
               </div>
               <div>
-                <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+                <span className="text-xl font-semibold text-foreground">
                   HyperLocal Forecast
                 </span>
                 <Badge variant="secondary" className="ml-2 text-xs">Enterprise</Badge>
@@ -36,7 +36,8 @@ export default function Landing() {
             </div>
             <Button 
               onClick={() => window.location.href = "/api/login"}
-              className="shadow-sm"
+              variant="outline"
+              className="font-medium"
               data-testid="button-signin"
             >
               Sign In
@@ -46,23 +47,23 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-24">
-        <div className="text-center max-w-5xl mx-auto">
-          <Badge variant="outline" className="mb-4">
-            <Building2 className="w-3 h-3 mr-1" />
+      <section className="container mx-auto px-6 py-32">
+        <div className="text-center max-w-4xl mx-auto">
+          <Badge variant="outline" className="mb-6 px-4 py-1.5">
+            <Building2 className="w-3 h-3 mr-2" />
             Enterprise Inventory Intelligence
           </Badge>
-          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground leading-tight tracking-tight">
             AI-Powered Demand Forecasting
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
             Eliminate stockouts and reduce overstock with probabilistic demand forecasting, 
             automated reorder suggestions, and real-time anomaly detection for retail operations.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="text-lg px-8 py-6 shadow-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
+              className="text-lg px-8 py-6 font-medium"
               onClick={() => window.location.href = "/api/login"}
               data-testid="button-get-started"
             >
@@ -82,134 +83,108 @@ export default function Landing() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="pb-4">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Probabilistic Forecasting</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                7-day per-SKU demand forecasts with confidence intervals (P10, P50, P90) using advanced statistical models
-              </p>
-            </CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
+              <TrendingUp className="h-6 w-6 text-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-3 text-foreground">Probabilistic Forecasting</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              7-day per-SKU demand forecasts with confidence intervals (P10, P50, P90) using advanced statistical models
+            </p>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="pb-4">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4">
-                <Target className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Smart Reorder Engine</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                Lead-time aware replenishment suggestions with conservative and aggressive strategies
-              </p>
-            </CardContent>
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
+              <Target className="h-6 w-6 text-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-3 text-foreground">Smart Reorder Engine</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              Lead-time aware replenishment suggestions with conservative and aggressive strategies
+            </p>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="pb-4">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Anomaly Detection</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                Real-time detection of demand spikes, inventory discrepancies, and forecast accuracy issues
-              </p>
-            </CardContent>
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
+              <Shield className="h-6 w-6 text-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-3 text-foreground">Anomaly Detection</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              Real-time detection of demand spikes, inventory discrepancies, and forecast accuracy issues
+            </p>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="pb-4">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4">
-                <Database className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Multi-Tenant Architecture</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                Organization-level data isolation with role-based access control for teams
-              </p>
-            </CardContent>
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
+              <Database className="h-6 w-6 text-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-3 text-foreground">Multi-Tenant Architecture</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              Organization-level data isolation with role-based access control for teams
+            </p>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="pb-4">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-4">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Data Integration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                CSV upload, REST API endpoints, and automated validation for POS/ERP data ingestion
-              </p>
-            </CardContent>
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
+              <FileText className="h-6 w-6 text-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-3 text-foreground">Data Integration</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              CSV upload, REST API endpoints, and automated validation for POS/ERP data ingestion
+            </p>
           </Card>
 
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <CardHeader className="pb-4">
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center mb-4">
-                <Bell className="h-6 w-6 text-white" />
-              </div>
-              <CardTitle className="text-xl">Smart Notifications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                Automated email alerts for critical stockouts, anomalies, and forecast accuracy issues
-              </p>
-            </CardContent>
+          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
+              <Bell className="h-6 w-6 text-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-3 text-foreground">Smart Notifications</h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              Automated email alerts for critical stockouts, anomalies, and forecast accuracy issues
+            </p>
           </Card>
         </div>
 
         {/* Key Benefits */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Clock className="h-8 w-8 text-primary" />
+            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
+              <Clock className="h-8 w-8 text-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Reduce Stockouts</h3>
-            <p className="text-muted-foreground">Prevent lost sales with accurate demand predictions</p>
+            <h3 className="text-xl font-semibold mb-3 text-foreground">Reduce Stockouts</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">Prevent lost sales with accurate demand predictions</p>
           </div>
           
           <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="h-8 w-8 text-primary" />
+            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="h-8 w-8 text-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Optimize Inventory</h3>
-            <p className="text-muted-foreground">Minimize excess stock while maintaining service levels</p>
+            <h3 className="text-xl font-semibold mb-3 text-foreground">Optimize Inventory</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">Minimize excess stock while maintaining service levels</p>
           </div>
           
           <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto mb-4">
-              <Users className="h-8 w-8 text-primary" />
+            <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6">
+              <Users className="h-8 w-8 text-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Enterprise Ready</h3>
-            <p className="text-muted-foreground">Multi-store operations with role-based permissions</p>
+            <h3 className="text-xl font-semibold mb-3 text-foreground">Enterprise Ready</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">Multi-store operations with role-based permissions</p>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/80"></div>
-        <div className="relative container mx-auto px-6 py-20 text-center">
-          <h2 className="text-4xl font-bold mb-4 text-primary-foreground">
+      <section className="py-24 border-t border-border">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-6 text-foreground">
             Ready to Transform Your Inventory Management?
           </h2>
-          <p className="text-xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
+          <p className="text-xl mb-10 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Get started with intelligent demand forecasting and automated reorder management
           </p>
           <Button 
-            variant="secondary" 
             size="lg"
-            className="text-lg px-8 py-6 shadow-lg bg-white text-primary hover:bg-white/90"
+            className="text-lg px-8 py-6 font-medium"
             onClick={() => window.location.href = "/api/login"}
             data-testid="button-start-trial"
           >
@@ -220,16 +195,16 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30 py-12">
+      <footer className="border-t border-border bg-muted/30 py-12">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                <BarChart3 className="h-4 w-4 text-primary-foreground" />
+              <div className="h-8 w-8 rounded-xl bg-foreground flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-background" />
               </div>
-              <span className="text-lg font-semibold">HyperLocal Forecast</span>
+              <span className="text-lg font-semibold text-foreground">HyperLocal Forecast</span>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               &copy; 2025 HyperLocal Forecast. Enterprise inventory intelligence.
             </p>
           </div>

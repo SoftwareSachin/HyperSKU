@@ -37,31 +37,31 @@ export default function MetricsGrid({ storeId }: MetricsGridProps) {
       value: metrics?.activeAlerts || 0,
       icon: AlertTriangle,
       color: "text-destructive",
-      bgColor: "bg-destructive/10",
+      bgColor: "bg-muted",
       change: "+12% from last week",
     },
     {
       title: "Reorder Suggestions",
       value: metrics?.reorderSuggestions || 0,
       icon: ShoppingCart,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      color: "text-foreground",
+      bgColor: "bg-muted",
       change: "Pending review",
     },
     {
       title: "Forecast Accuracy",
       value: `${metrics?.forecastAccuracy || 0}%`,
       icon: TrendingUp,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      color: "text-primary",
+      bgColor: "bg-muted",
       change: "7-day MAPE",
     },
     {
       title: "Stock Coverage",
       value: `${metrics?.stockCoverage || 0} days`,
       icon: Package,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
+      color: "text-foreground",
+      bgColor: "bg-muted",
       change: "Average across SKUs",
     },
   ];
@@ -71,7 +71,7 @@ export default function MetricsGrid({ storeId }: MetricsGridProps) {
       {metricsData.map((metric) => {
         const Icon = metric.icon;
         return (
-          <Card key={metric.title}>
+          <Card key={metric.title} className="border border-border shadow-sm hover:shadow-md transition-all duration-200">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -82,11 +82,11 @@ export default function MetricsGrid({ storeId }: MetricsGridProps) {
                     {metric.value}
                   </p>
                 </div>
-                <div className={`h-8 w-8 ${metric.bgColor} rounded-full flex items-center justify-center`}>
-                  <Icon className={`h-4 w-4 ${metric.color}`} />
+                <div className={`h-10 w-10 ${metric.bgColor} rounded-xl flex items-center justify-center`}>
+                  <Icon className={`h-5 w-5 ${metric.color}`} />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
+              <p className="text-xs text-muted-foreground mt-3">
                 {metric.change}
               </p>
             </CardContent>

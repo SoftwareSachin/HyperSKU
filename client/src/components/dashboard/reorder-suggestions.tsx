@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Download } from "lucide-react";
+import { Download, ShoppingCart } from "lucide-react";
 
 interface ReorderSuggestionsProps {
   storeId: string;
@@ -72,10 +72,10 @@ export default function ReorderSuggestions({ storeId }: ReorderSuggestionsProps)
     );
   }
 
-  const pendingReorders = reorders?.filter((r: any) => r.status === 'pending') || [];
+  const pendingReorders = (reorders as any[])?.filter((r: any) => r.status === 'pending') || [];
 
   return (
-    <Card>
+    <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Pending Reorders</CardTitle>
@@ -100,7 +100,7 @@ export default function ReorderSuggestions({ storeId }: ReorderSuggestionsProps)
             </div>
           ) : (
             pendingReorders.map((reorder: any) => (
-              <div key={reorder.id} className="border border-border rounded-md p-4">
+              <div key={reorder.id} className="border border-border rounded-xl p-4 hover:bg-muted/30 transition-colors duration-200" data-testid={`reorder-item-${reorder.id}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="font-medium">SKU: {reorder.skuId}</div>
                   <div className="text-sm text-muted-foreground">
@@ -133,7 +133,6 @@ export default function ReorderSuggestions({ storeId }: ReorderSuggestionsProps)
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700"
                       onClick={() => handleReorderAction(reorder.id, 'approved')}
                       disabled={updateReorderMutation.isPending}
                       data-testid={`button-approve-${reorder.id}`}

@@ -35,11 +35,11 @@ export default function TopRiskSkus({ storeId }: TopRiskSkusProps) {
   }
 
   return (
-    <Card>
+    <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Top At-Risk SKUs</CardTitle>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" data-testid="button-view-all-risk-skus">
             View All
           </Button>
         </div>
@@ -54,7 +54,7 @@ export default function TopRiskSkus({ storeId }: TopRiskSkusProps) {
             </div>
           ) : (
             riskSkus.map((item: TopRiskSku, index: number) => (
-              <div key={index} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+              <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors duration-200" data-testid={`risk-sku-item-${index}`}>
                 <div className="flex-1">
                   <div className="font-medium">{item.sku.name}</div>
                   <div className="text-sm text-muted-foreground">
@@ -65,7 +65,7 @@ export default function TopRiskSkus({ storeId }: TopRiskSkusProps) {
                   <div className={`text-sm font-medium ${
                     item.riskLevel === 'High Risk' 
                       ? 'text-destructive' 
-                      : 'text-orange-600'
+                      : 'text-muted-foreground'
                   }`}>
                     {item.riskLevel}
                   </div>
@@ -78,7 +78,7 @@ export default function TopRiskSkus({ storeId }: TopRiskSkusProps) {
                     {item.riskLevel === 'High Risk' ? (
                       <AlertCircle className="h-4 w-4 text-destructive" />
                     ) : (
-                      <AlertTriangle className="h-4 w-4 text-orange-600" />
+                      <AlertTriangle className="h-4 w-4 text-muted-foreground" />
                     )}
                   </Button>
                 </div>
