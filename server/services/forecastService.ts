@@ -30,18 +30,19 @@ class ForecastService {
     const { historicalData, horizonHours } = input;
     
     if (historicalData.length < 7) {
-      return this.generateBaseline(horizonHours);
+      return this.generateBaseline(historicalData, horizonHours);
     }
     
     // Extract quantities for analysis
     const quantities = historicalData.map(d => d.quantity);
-    
-    // Calculate moving averages
     const mean = this.calculateMean(quantities);
-    const std = this.calculateStandardDeviation(quantities, mean);
     
-    // Detect seasonality (simplified)
-    const seasonality = this.detectSeasonality(historicalData);
+    // Detect mean-centered seasonality
+    const seasonalityDeviations = this.detectSeasonality(historicalData, mean);
+    
+    // Calculate residuals from level + seasonal model
+    const residuals = this.calculateResiduals(historicalData, mean, seasonalityDeviations);
+    const residualStd = this.calculateStandardDeviation(residuals, 0);
     
     // Generate forecast points
     const forecastPoints = Math.ceil(horizonHours / 24); // Daily forecasts
@@ -49,23 +50,31 @@ class ForecastService {
     const p10: number[] = [];
     const p90: number[] = [];
     
+    // Align forecast start day with the day after last historical timestamp
+    const lastTimestamp = historicalData[historicalData.length - 1]?.timestamp || new Date();
+    const startDay = (lastTimestamp.getDay() + 1) % 7;
+    
     for (let i = 0; i < forecastPoints; i++) {
-      const baseValue = mean + (seasonality[i % 7] || 0);
-      const uncertainty = std * Math.sqrt(i + 1) * 0.1; // Increasing uncertainty
+      const dayOfWeek = (startDay + i) % 7;
+      const baseValue = mean + seasonalityDeviations[dayOfWeek];
+      const uncertainty = residualStd * Math.sqrt(i + 1); // Proper uncertainty scaling
       
       median.push(Math.max(0, baseValue));
       p10.push(Math.max(0, baseValue - 1.28 * uncertainty));
       p90.push(Math.max(0, baseValue + 1.28 * uncertainty));
     }
     
+    // Calculate accuracy using proper backtesting
+    const accuracy = await this.calculateBacktestAccuracy(historicalData);
+    
     return {
       median,
       p10,
       p90,
       metadata: {
-        model: "moving-average-with-seasonality",
-        accuracy: this.calculateMAPE(quantities),
-        notes: `Forecast based on ${historicalData.length} historical data points`,
+        model: "level-seasonal-with-residuals",
+        accuracy,
+        notes: `Forecast based on ${historicalData.length} historical data points with ${residuals.length} residuals`,
       },
     };
   }
@@ -73,17 +82,28 @@ class ForecastService {
   /**
    * Generate baseline forecast for SKUs with limited data
    */
-  private generateBaseline(horizonHours: number): ForecastResult {
+  private generateBaseline(historicalData: Array<{ timestamp: Date; quantity: number }>, horizonHours: number): ForecastResult {
     const forecastPoints = Math.ceil(horizonHours / 24);
-    const baseValue = 5; // Conservative baseline
+    
+    // Use median of recent data if available, otherwise conservative baseline
+    let baseValue = 5;
+    if (historicalData.length > 0) {
+      const quantities = historicalData.map(d => d.quantity).sort((a, b) => a - b);
+      const medianIndex = Math.floor(quantities.length / 2);
+      baseValue = quantities.length % 2 === 0 
+        ? (quantities[medianIndex - 1] + quantities[medianIndex]) / 2
+        : quantities[medianIndex];
+      baseValue = Math.max(1, baseValue); // Ensure positive baseline
+    }
     
     return {
       median: Array(forecastPoints).fill(baseValue),
-      p10: Array(forecastPoints).fill(baseValue * 0.5),
-      p90: Array(forecastPoints).fill(baseValue * 2),
+      p10: Array(forecastPoints).fill(baseValue * 0.6),
+      p90: Array(forecastPoints).fill(baseValue * 1.8),
       metadata: {
-        model: "baseline",
-        notes: "Insufficient historical data - using baseline forecast",
+        model: "baseline-median",
+        accuracy: 60, // Conservative accuracy estimate for baseline
+        notes: `Insufficient historical data - using ${historicalData.length > 0 ? 'median' : 'default'} baseline forecast`,
       },
     };
   }
@@ -104,9 +124,9 @@ class ForecastService {
   }
   
   /**
-   * Detect weekly seasonality patterns
+   * Detect weekly seasonality patterns as deviations from mean
    */
-  private detectSeasonality(data: Array<{ timestamp: Date; quantity: number }>): number[] {
+  private detectSeasonality(data: Array<{ timestamp: Date; quantity: number }>, overallMean: number): number[] {
     const weeklyPattern = new Array(7).fill(0);
     const weeklyCounts = new Array(7).fill(0);
     
@@ -116,30 +136,64 @@ class ForecastService {
       weeklyCounts[dayOfWeek]++;
     });
     
-    // Calculate average for each day of week
-    return weeklyPattern.map((total, i) => 
-      weeklyCounts[i] > 0 ? total / weeklyCounts[i] : 0
-    );
+    // Calculate average for each day of week, then subtract overall mean to get deviations
+    return weeklyPattern.map((total, i) => {
+      if (weeklyCounts[i] === 0) return 0;
+      const dayAverage = total / weeklyCounts[i];
+      return dayAverage - overallMean; // Mean-centered seasonality
+    });
   }
   
   /**
-   * Calculate Mean Absolute Percentage Error
+   * Calculate residuals from level + seasonal model
    */
-  private calculateMAPE(values: number[]): number {
-    if (values.length < 2) return 0;
+  private calculateResiduals(data: Array<{ timestamp: Date; quantity: number }>, mean: number, seasonalityDeviations: number[]): number[] {
+    return data.map(({ timestamp, quantity }) => {
+      const dayOfWeek = timestamp.getDay();
+      const predicted = mean + seasonalityDeviations[dayOfWeek];
+      return quantity - predicted;
+    });
+  }
+  
+  /**
+   * Calculate forecast accuracy using backtesting
+   */
+  private async calculateBacktestAccuracy(data: Array<{ timestamp: Date; quantity: number }>): Promise<number> {
+    if (data.length < 14) return 70; // Default for insufficient data
     
-    let totalError = 0;
-    let count = 0;
+    // Hold out last 7 days for testing
+    const trainData = data.slice(0, -7);
+    const testData = data.slice(-7);
     
-    for (let i = 1; i < values.length; i++) {
-      if (values[i] > 0) {
-        const error = Math.abs((values[i] - values[i-1]) / values[i]);
-        totalError += error;
-        count++;
+    if (trainData.length < 7) return 70;
+    
+    const trainQuantities = trainData.map(d => d.quantity);
+    const trainMean = this.calculateMean(trainQuantities);
+    const trainSeasonality = this.detectSeasonality(trainData, trainMean);
+    
+    // Generate forecasts for test period
+    const lastTrainTimestamp = trainData[trainData.length - 1].timestamp;
+    const startDay = (lastTrainTimestamp.getDay() + 1) % 7;
+    
+    let totalAPE = 0;
+    let validPredictions = 0;
+    
+    for (let i = 0; i < testData.length; i++) {
+      const dayOfWeek = (startDay + i) % 7;
+      const forecast = trainMean + trainSeasonality[dayOfWeek];
+      const actual = testData[i].quantity;
+      
+      if (actual > 0) {
+        const ape = Math.abs((forecast - actual) / actual);
+        totalAPE += ape;
+        validPredictions++;
       }
     }
     
-    return count > 0 ? (1 - totalError / count) * 100 : 80; // Default 80% accuracy
+    if (validPredictions === 0) return 70;
+    
+    const mape = totalAPE / validPredictions;
+    return Math.max(0, Math.min(100, (1 - mape) * 100)); // Convert to accuracy percentage
   }
   
   /**
@@ -221,8 +275,8 @@ class ForecastService {
         const p90Forecast = forecast.p90Forecast as number[];
         
         // Calculate demand during lead time
-        const leadTimeDemand = medianForecast.slice(0, leadTimeDays).reduce((sum, val) => sum + val, 0);
-        const conservativeDemand = p90Forecast.slice(0, leadTimeDays).reduce((sum, val) => sum + val, 0);
+        const leadTimeDemand = medianForecast.slice(0, Math.min(leadTimeDays, medianForecast.length)).reduce((sum, val) => sum + val, 0);
+        const conservativeDemand = p90Forecast.slice(0, Math.min(leadTimeDays, p90Forecast.length)).reduce((sum, val) => sum + val, 0);
         
         // Calculate safety stock (20% of lead time demand)
         const safetyStock = Math.ceil(leadTimeDemand * 0.2);
