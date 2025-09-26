@@ -3,7 +3,12 @@ import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
 
-// Configure Neon for Replit environment
+// Configure Neon for Replit environment - disable SSL certificate verification
+// This is needed because Replit's environment has SSL certificate chain issues with Neon
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
