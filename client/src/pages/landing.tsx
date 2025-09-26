@@ -47,102 +47,145 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 py-32">
-        <div className="text-center max-w-4xl mx-auto">
-          <Badge variant="outline" className="mb-6 px-4 py-1.5">
-            <Building2 className="w-3 h-3 mr-2" />
-            Enterprise Inventory Intelligence
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground leading-tight tracking-tight">
-            AI-Powered Demand Forecasting
+      <section className="container mx-auto px-6 py-20 md:py-32">
+        <div className="text-center max-w-5xl mx-auto">
+          <div className="mb-8">
+            <Badge variant="outline" className="mb-6 px-6 py-2 text-sm font-medium border-2">
+              <Building2 className="w-4 h-4 mr-2" />
+              Enterprise Inventory Intelligence Platform
+            </Badge>
+          </div>
+          
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 text-foreground leading-[1.1] tracking-tight">
+            Precision Demand Forecasting
+            <span className="block text-primary mt-2">for Modern Retail</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto leading-relaxed">
-            Eliminate stockouts and reduce overstock with probabilistic demand forecasting, 
-            automated reorder suggestions, and real-time anomaly detection for retail operations.
+          
+          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
+            Transform your inventory management with probabilistic demand forecasting, intelligent reorder automation, 
+            and real-time anomaly detection. Built for enterprise retail operations that demand accuracy and efficiency.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
               size="lg" 
-              className="text-lg px-8 py-6 font-medium"
+              className="text-lg px-10 py-4 h-14 font-semibold min-w-[200px]"
               onClick={() => window.location.href = "/api/login"}
               data-testid="button-get-started"
             >
-              Get Started
-              <ArrowRight className="ml-2 w-4 h-4" />
+              Start Free Trial
+              <ArrowRight className="ml-3 w-5 h-5" />
             </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-10 py-4 h-14 font-semibold min-w-[200px] border-2"
+              onClick={() => window.location.href = "/api/login"}
+              data-testid="button-view-demo"
+            >
+              View Platform
+            </Button>
+          </div>
+          
+          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span>No setup required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span>Enterprise security</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span>24/7 support</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Core Features */}
-      <section className="container mx-auto px-6 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Enterprise-Grade Features</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Complete inventory intelligence platform built for retail operations
-          </p>
-        </div>
+      <section className="bg-muted/30 py-24">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <Badge variant="outline" className="mb-6 px-4 py-2">
+              Platform Capabilities
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-foreground">
+              Enterprise-Grade Intelligence
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Comprehensive demand forecasting and inventory optimization platform designed 
+              for retail enterprises requiring precision, scalability, and operational excellence.
+            </p>
+          </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
-              <TrendingUp className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-3 text-foreground">Probabilistic Forecasting</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">
-              7-day per-SKU demand forecasts with confidence intervals (P10, P50, P90) using advanced statistical models
-            </p>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+            <Card className="bg-background border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-8 h-full group">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary/15 transition-colors">
+                <TrendingUp className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-foreground">Probabilistic Forecasting</h3>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Advanced statistical modeling delivers 7-day per-SKU demand forecasts with confidence intervals (P10, P50, P90), enabling precise inventory planning and risk assessment.
+              </p>
 
-          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
-              <Target className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-3 text-foreground">Smart Reorder Engine</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">
-              Lead-time aware replenishment suggestions with conservative and aggressive strategies
-            </p>
-          </Card>
+            </Card>
 
-          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
-              <Shield className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-3 text-foreground">Anomaly Detection</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">
-              Real-time detection of demand spikes, inventory discrepancies, and forecast accuracy issues
-            </p>
-          </Card>
+            <Card className="bg-background border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-8 h-full group">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary/15 transition-colors">
+                <Target className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-foreground">Smart Reorder Engine</h3>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Intelligent replenishment automation with lead-time optimization, safety stock calculations, and configurable strategies for different risk tolerance levels.
+              </p>
 
-          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
-              <Database className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-3 text-foreground">Multi-Tenant Architecture</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">
-              Organization-level data isolation with role-based access control for teams
-            </p>
-          </Card>
+            </Card>
 
-          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
-              <FileText className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-3 text-foreground">Data Integration</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">
-              CSV upload, REST API endpoints, and automated validation for POS/ERP data ingestion
-            </p>
-          </Card>
+            <Card className="bg-background border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-8 h-full group">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary/15 transition-colors">
+                <Shield className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-foreground">Anomaly Detection</h3>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Real-time monitoring identifies demand spikes, inventory discrepancies, and forecast accuracy deviations with intelligent alerting and automated response protocols.
+              </p>
 
-          <Card className="border border-border shadow-sm hover:shadow-md transition-all duration-200 p-6">
-            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-6">
-              <Bell className="h-6 w-6 text-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-3 text-foreground">Smart Notifications</h3>
-            <p className="text-muted-foreground leading-relaxed text-sm">
-              Automated email alerts for critical stockouts, anomalies, and forecast accuracy issues
-            </p>
-          </Card>
+            </Card>
+
+            <Card className="bg-background border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-8 h-full group">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary/15 transition-colors">
+                <Database className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-foreground">Multi-Tenant Architecture</h3>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Enterprise-grade data isolation with organization-level segmentation, role-based access control, and granular permissions for complex retail organizational structures.
+              </p>
+
+            </Card>
+
+            <Card className="bg-background border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-8 h-full group">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary/15 transition-colors">
+                <FileText className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-foreground">Data Integration</h3>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Comprehensive data ingestion through secure API endpoints, automated CSV processing, and real-time validation with support for major POS and ERP systems.
+              </p>
+
+            </Card>
+
+            <Card className="bg-background border-0 shadow-lg hover:shadow-xl transition-all duration-300 p-8 h-full group">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:bg-primary/15 transition-colors">
+                <Bell className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold mb-4 text-foreground">Smart Notifications</h3>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Intelligent alerting system with configurable thresholds, multi-channel delivery, and contextual insights for critical stockouts and operational anomalies.
+              </p>
+
+            </Card>
         </div>
 
         {/* Key Benefits */}
@@ -171,26 +214,59 @@ export default function Landing() {
             <p className="text-muted-foreground text-sm leading-relaxed">Multi-store operations with role-based permissions</p>
           </div>
         </div>
+        </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 border-t border-border">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-6 text-foreground">
-            Ready to Transform Your Inventory Management?
-          </h2>
-          <p className="text-xl mb-10 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Get started with intelligent demand forecasting and automated reorder management
-          </p>
-          <Button 
-            size="lg"
-            className="text-lg px-8 py-6 font-medium"
-            onClick={() => window.location.href = "/api/login"}
-            data-testid="button-start-trial"
-          >
-            Get Started
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
+      <section className="bg-muted/20 py-32">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <Badge variant="outline" className="mb-8 px-4 py-2">
+              Ready to Get Started?
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold mb-8 text-foreground leading-tight">
+              Transform Your Inventory Operations
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+              Join retail organizations transforming their inventory operations with intelligent forecasting and automated optimization. Experience precision inventory management built for modern commerce.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+              <Button 
+                size="lg"
+                className="text-lg px-12 py-4 h-16 font-semibold min-w-[250px]"
+                onClick={() => window.location.href = "/api/login"}
+                data-testid="button-start-trial"
+              >
+                Start Free Trial
+                <ArrowRight className="ml-3 w-5 h-5" />
+              </Button>
+              <Button 
+                variant="outline"
+                size="lg"
+                className="text-lg px-12 py-4 h-16 font-semibold min-w-[250px] border-2"
+                onClick={() => window.location.href = "/api/login"}
+                data-testid="button-contact-sales"
+              >
+                Contact Sales
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-border/50">
+              <div className="text-center">
+                <div className="text-lg font-semibold text-foreground mb-2">Reduce Stockouts</div>
+                <div className="text-sm text-muted-foreground">Minimize lost sales with precise demand forecasting</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-foreground mb-2">Optimize Inventory</div>
+                <div className="text-sm text-muted-foreground">Right-size stock levels with intelligent automation</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-foreground mb-2">Enhance Operations</div>
+                <div className="text-sm text-muted-foreground">Streamline workflows with enterprise-grade tools</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
