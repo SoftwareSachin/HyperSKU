@@ -57,6 +57,7 @@ export interface IStorage {
   getSkusByOrganization(organizationId: string): Promise<Sku[]>;
   getSku(id: string): Promise<Sku | undefined>;
   updateSku(id: string, sku: Partial<InsertSku>): Promise<Sku>;
+  updateSupplier(id: string, supplier: Partial<InsertSupplier>): Promise<Supplier>;
   
   // Supplier operations
   createSupplier(supplier: InsertSupplier): Promise<Supplier>;
@@ -86,6 +87,8 @@ export interface IStorage {
   createAnomaly(anomaly: InsertAnomaly): Promise<Anomaly>;
   getAnomaliesByStore(storeId: string): Promise<Anomaly[]>;
   updateAnomalyStatus(id: string, status: string): Promise<Anomaly>;
+  getAnomaly(id: string): Promise<Anomaly | undefined>;
+  getReorder(id: string): Promise<Reorder | undefined>;
   
   // Data job operations
   createDataJob(job: InsertDataJob): Promise<DataJob>;
@@ -220,6 +223,15 @@ export class DatabaseStorage implements IStorage {
     const [supplier] = await db.select().from(suppliers).where(eq(suppliers.id, id));
     return supplier;
   }
+
+  async updateSupplier(id: string, supplier: Partial<InsertSupplier>): Promise<Supplier> {
+    const [updated] = await db
+      .update(suppliers)
+      .set({ ...supplier, updatedAt: new Date() })
+      .where(eq(suppliers.id, id))
+      .returning();
+    return updated;
+  }
   
   // Sales operations
   async insertSales(salesData: InsertSales[]): Promise<Sales[]> {
@@ -338,6 +350,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(anomalies.id, id))
       .returning();
     return updated;
+  }
+
+  async getAnomaly(id: string): Promise<Anomaly | undefined> {
+    const [anomaly] = await db.select().from(anomalies).where(eq(anomalies.id, id));
+    return anomaly;
+  }
+
+  async getReorder(id: string): Promise<Reorder | undefined> {
+    const [reorder] = await db.select().from(reorders).where(eq(reorders.id, id));
+    return reorder;
   }
   
   // Data job operations
