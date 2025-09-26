@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import type { Store } from "@/types";
 import Header from "@/components/layout/header";
 import Sidebar from "@/components/layout/sidebar";
 import MetricsGrid from "@/components/dashboard/metrics-grid";
@@ -33,7 +34,7 @@ export default function Dashboard() {
   }, [isAuthenticated, isLoading, toast]);
 
   // Fetch user stores
-  const { data: stores } = useQuery({
+  const { data: stores = [] } = useQuery<Store[]>({
     queryKey: ["/api/stores"],
     enabled: isAuthenticated,
     retry: false,

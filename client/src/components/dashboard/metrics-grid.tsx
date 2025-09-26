@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ShoppingCart, TrendingUp, Package } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import type { DashboardMetrics } from "@/types";
 
 interface MetricsGridProps {
   storeId: string;
 }
 
 export default function MetricsGrid({ storeId }: MetricsGridProps) {
-  const { data: metrics, isLoading } = useQuery({
+  const { data: metrics, isLoading } = useQuery<DashboardMetrics>({
     queryKey: ["/api/dashboard/metrics", storeId],
     enabled: !!storeId,
   });

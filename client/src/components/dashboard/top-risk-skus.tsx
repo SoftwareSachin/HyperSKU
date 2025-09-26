@@ -1,14 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, AlertTriangle } from "lucide-react";
+import { AlertCircle, AlertTriangle, Package } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import type { TopRiskSku } from "@/types";
 
 interface TopRiskSkusProps {
   storeId: string;
 }
 
 export default function TopRiskSkus({ storeId }: TopRiskSkusProps) {
-  const { data: riskSkus, isLoading } = useQuery({
+  const { data: riskSkus = [], isLoading } = useQuery<TopRiskSku[]>({
     queryKey: ["/api/dashboard/top-risk-skus", storeId],
     enabled: !!storeId,
   });
@@ -46,13 +47,13 @@ export default function TopRiskSkus({ storeId }: TopRiskSkusProps) {
       
       <CardContent>
         <div className="space-y-4">
-          {!riskSkus || riskSkus.length === 0 ? (
+          {riskSkus.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Package className="h-8 w-8 mx-auto mb-2" />
               <p>No at-risk SKUs found</p>
             </div>
           ) : (
-            riskSkus.map((item: any, index: number) => (
+            riskSkus.map((item: TopRiskSku, index: number) => (
               <div key={index} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
                 <div className="flex-1">
                   <div className="font-medium">{item.sku.name}</div>
