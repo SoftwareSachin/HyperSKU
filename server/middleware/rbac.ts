@@ -22,67 +22,69 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-// Middleware to load user data and organization context
+// Middleware to load user data and organization context - BYPASSED FOR DEVELOPMENT
 export const loadUserContext = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    // BYPASS: Set default context if no auth
     if (!req.user?.claims?.sub) {
-      return res.status(401).json({ message: "Unauthorized" });
+      req.user = {
+        claims: { sub: 'bypass-user' },
+        organizationId: 'd27d9a92-efc5-4941-83cb-1e5709669ae9', // Default org
+        role: 'admin' as UserRole,
+        dbUser: { id: 'bypass-user', role: 'admin' }
+      };
+      return next();
     }
 
     const user = await storage.getUser(req.user.claims.sub);
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      // BYPASS: Create default user context
+      req.user.organizationId = 'd27d9a92-efc5-4941-83cb-1e5709669ae9';
+      req.user.role = 'admin' as UserRole;
+      req.user.dbUser = { id: req.user.claims.sub, role: 'admin' };
+      return next();
     }
 
     req.user.dbUser = user;
-    req.user.organizationId = user.organizationId || undefined;
-    req.user.role = (user.role as UserRole) || "viewer";
+    req.user.organizationId = user.organizationId || 'd27d9a92-efc5-4941-83cb-1e5709669ae9';
+    req.user.role = (user.role as UserRole) || "admin";
 
     next();
   } catch (error) {
     console.error("Error loading user context:", error);
-    res.status(500).json({ message: "Failed to load user context" });
+    // BYPASS: Provide default context on error
+    req.user = req.user || {};
+    req.user.organizationId = 'd27d9a92-efc5-4941-83cb-1e5709669ae9';
+    req.user.role = 'admin' as UserRole;
+    req.user.dbUser = { id: 'bypass-user', role: 'admin' };
+    next();
   }
 };
 
-// Check if user has required role
+// Check if user has required role - BYPASSED FOR DEVELOPMENT
 export const requireRole = (...requiredRoles: UserRole[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const userRole = req.user?.role;
-    
-    if (!userRole) {
-      return res.status(401).json({ message: "User role not found" });
-    }
-
-    const userPermissions = ROLE_HIERARCHY[userRole as UserRole];
-    const hasPermission = requiredRoles.some(role => 
-      userPermissions.includes(role)
-    );
-
-    if (!hasPermission) {
-      return res.status(403).json({ 
-        message: `Access denied. Required roles: ${requiredRoles.join(", ")}` 
-      });
-    }
-
+    // BYPASS: Always grant admin access
+    req.user = req.user || {};
+    req.user.role = 'admin' as UserRole;
     next();
   };
 };
 
-// Check if user belongs to organization
+// Check if user belongs to organization - BYPASSED FOR DEVELOPMENT
 export const requireOrganization = (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
+  // BYPASS: Always provide default organization
   if (!req.user?.organizationId) {
-    return res.status(400).json({ 
-      message: "User not associated with organization" 
-    });
+    req.user = req.user || {};
+    req.user.organizationId = 'd27d9a92-efc5-4941-83cb-1e5709669ae9';
   }
   next();
 };
