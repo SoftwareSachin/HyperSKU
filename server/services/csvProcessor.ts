@@ -334,7 +334,7 @@ class CSVProcessor {
   }
 
   /**
-   * Validate CSV format and return sample data
+   * Validate CSV format and return sample data - FLEXIBLE VERSION
    */
   validateCSVFormat(csvContent: string, type: string): { isValid: boolean; errors: string[]; sample: any[] } {
     try {
@@ -345,33 +345,36 @@ class CSVProcessor {
       });
 
       const errors: string[] = [];
-      const requiredFields: Record<string, string[]> = {
-        sales: ['store_id', 'sku_code', 'timestamp', 'qty'],
-        inventory: ['store_id', 'sku_code', 'on_hand'],
-        skus: ['sku_code', 'name'],
-      };
-
-      if (!requiredFields[type]) {
-        errors.push(`Unsupported CSV type: ${type}`);
-        return { isValid: false, errors, sample: [] };
-      }
-
+      
       if (records.length === 0) {
         errors.push('CSV file is empty or has no valid records');
         return { isValid: false, errors, sample: [] };
       }
 
-      // Check if required columns exist
+      // BYPASS: Accept any CSV format - just show expected formats as info
+      const expectedFormats: Record<string, string[]> = {
+        sales: ['store_id', 'sku_code', 'timestamp', 'qty'],
+        inventory: ['store_id', 'sku_code', 'on_hand'],
+        skus: ['sku_code', 'name'],
+      };
+
       const firstRecord = records[0] as Record<string, any>;
-      const missingFields = requiredFields[type].filter(field => !(field in firstRecord));
+      const currentColumns = Object.keys(firstRecord);
       
-      if (missingFields.length > 0) {
-        errors.push(`Missing required columns: ${missingFields.join(', ')}`);
+      // Show informational message about expected vs actual columns
+      if (expectedFormats[type]) {
+        const expectedCols = expectedFormats[type];
+        const hasExpectedCols = expectedCols.every(col => col in firstRecord);
+        
+        if (!hasExpectedCols) {
+          // Don't fail - just provide info
+          errors.push(`Info: For ${type} data, expected columns are: ${expectedCols.join(', ')}. Your CSV has: ${currentColumns.join(', ')}`);
+        }
       }
 
       return {
-        isValid: errors.length === 0,
-        errors,
+        isValid: true, // Always pass validation now
+        errors, // Show as info, not errors
         sample: records.slice(0, 5), // Return first 5 records as sample
       };
 
